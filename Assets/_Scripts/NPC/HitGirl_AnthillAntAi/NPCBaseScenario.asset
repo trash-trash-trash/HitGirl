@@ -1,0 +1,254 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2f22e7053ea04ed0922308786facc8c, type: 3}
+  m_Name: NPCBaseScenario
+  m_EditorClassIdentifier: 
+  conditions:
+    list:
+    - id: 0
+      name: Alive
+    - id: 1
+      name: Awake
+    - id: 2
+      name: Spawned
+    - id: 3
+      name: SusMid
+    - id: 4
+      name: SusSeenPlayer
+    - id: 5
+      name: Alert
+    - id: 6
+      name: DoingJob
+    - id: 7
+      name: Idle
+    - id: 8
+      name: Satisfied
+    - id: 9
+      name: Shoved
+    - id: 10
+      name: HeardSound
+  actions:
+  - name: Death
+    isDefault: 0
+    state: {fileID: 623823010807027238, guid: 89b6bb840c6d0d54689daa54961f9790, type: 3}
+    cost: 0
+    position: {x: 206.93356, y: 750.39996}
+    pre:
+    - id: 0
+      value: 0
+    - id: 2
+      value: 1
+    post:
+    - id: 0
+      value: 1
+  - name: Spawn
+    isDefault: 1
+    state: {fileID: 2751700427627965486, guid: f134323a43b75e248bbdbb9808a09b70, type: 3}
+    cost: 0
+    position: {x: 210.66669, y: 64.66668}
+    pre:
+    - id: 2
+      value: 0
+    post:
+    - id: 0
+      value: 1
+    - id: 2
+      value: 1
+    - id: 1
+      value: 1
+  - name: WakeUp
+    isDefault: 0
+    state: {fileID: 2039771385642323088, guid: ad88b2756910b184c8a014885fbfd2ba, type: 3}
+    cost: 1
+    position: {x: 400.00018, y: 520.66656}
+    pre:
+    - id: 1
+      value: 0
+    - id: 0
+      value: 1
+    - id: 2
+      value: 1
+    post:
+    - id: 1
+      value: 1
+  - name: Sleep
+    isDefault: 0
+    state: {fileID: 4600637498787630256, guid: 7486a612de2351147bd2cb5a12808b47, type: 3}
+    cost: 0
+    position: {x: 208, y: 520.6667}
+    pre:
+    - id: 1
+      value: 0
+    - id: 0
+      value: 1
+    - id: 2
+      value: 1
+    post: []
+  - name: Alert
+    isDefault: 0
+    state: {fileID: 8366494893754356655, guid: 14e286b8c26470f4abf8b70e47896510, type: 3}
+    cost: 1
+    position: {x: 895.6665, y: 50.999947}
+    pre: []
+    post:
+    - id: 5
+      value: 0
+  - name: SusMid
+    isDefault: 0
+    state: {fileID: 6881332127070394786, guid: b93c7e09669135e4b8a6b6bbc942120b, type: 3}
+    cost: 1
+    position: {x: 447.6668, y: 52.333435}
+    pre: []
+    post:
+    - id: 3
+      value: 0
+  - name: SusSeenPlayer
+    isDefault: 0
+    state: {fileID: 5435928401631602869, guid: 61127a1e5ce69f6408aaf99a9feaae4f, type: 3}
+    cost: 1
+    position: {x: 661.00006, y: 51.00013}
+    pre: []
+    post:
+    - id: 4
+      value: 0
+  - name: DoJob
+    isDefault: 0
+    state: {fileID: 6475810566758554060, guid: 8542e9f2856c3d4428575dce70823d75, type: 3}
+    cost: 5
+    position: {x: 1428.3333, y: 177.66664}
+    pre:
+    - id: 6
+      value: 1
+    post:
+    - id: 8
+      value: 1
+  - name: Idle
+    isDefault: 0
+    state: {fileID: 3079188573483606946, guid: 60060f3c1fe7e174a909556262162824, type: 3}
+    cost: 0
+    position: {x: 791.9999, y: 347.3333}
+    pre:
+    - id: 0
+      value: 1
+    - id: 1
+      value: 1
+    - id: 7
+      value: 1
+    - id: 2
+      value: 1
+    - id: 3
+      value: 0
+    - id: 4
+      value: 0
+    - id: 5
+      value: 0
+    - id: 9
+      value: 0
+    - id: 10
+      value: 0
+    post:
+    - id: 6
+      value: 1
+  - name: PatrolToPoint
+    isDefault: 0
+    state: {fileID: 2129966689337830333, guid: 209ac3bc785c23e448b5d6677bbb087b, type: 3}
+    cost: 0
+    position: {x: 783.99976, y: 711.3334}
+    pre:
+    - id: 0
+      value: 1
+    - id: 1
+      value: 1
+    - id: 2
+      value: 1
+    - id: 3
+      value: 0
+    - id: 4
+      value: 0
+    - id: 5
+      value: 0
+    - id: 7
+      value: 0
+    - id: 9
+      value: 0
+    - id: 10
+      value: 0
+    post:
+    - id: 6
+      value: 1
+  - name: Shoved
+    isDefault: 0
+    state: {fileID: 1616339147116727816, guid: 6d25f61bfdcbbfa46968db3fc2fb5911, type: 3}
+    cost: 0
+    position: {x: 214.66666, y: 315.33334}
+    pre:
+    - id: 9
+      value: 1
+    post:
+    - id: 9
+      value: 0
+  - name: InvestigateSound
+    isDefault: 0
+    state: {fileID: 1696069911080289013, guid: 70dc839d271056a42a45f80f6d27edfb, type: 3}
+    cost: 1
+    position: {x: 447.73334, y: 245.33331}
+    pre:
+    - id: 10
+      value: 1
+    - id: 5
+      value: 0
+    post:
+    - id: 10
+      value: 0
+  goals:
+  - name: Die
+    isDefault: 0
+    position: {x: 404.00024, y: 750.39996}
+    conditions:
+    - id: 0
+      value: 0
+    - id: 2
+      value: 1
+  - name: DoJob
+    isDefault: 1
+    position: {x: 1993.6002, y: 219.99997}
+    conditions:
+    - id: 8
+      value: 1
+    - id: 6
+      value: 1
+  worldStates:
+  - position: {x: 1048, y: 438.3333}
+    isAutoUpdate: 1
+    list:
+    - id: 0
+      value: 1
+    - id: 1
+      value: 1
+    - id: 2
+      value: 1
+    - id: 3
+      value: 0
+    - id: 4
+      value: 0
+    - id: 5
+      value: 1
+    - id: 6
+      value: 0
+    - id: 7
+      value: 0
+    - id: 8
+      value: 0
+    - id: 9
+      value: 0
+    - id: 10
+      value: 0

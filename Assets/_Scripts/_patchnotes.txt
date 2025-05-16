@@ -1,0 +1,23 @@
+1.0
+
+Character, Interfaces, Player, Sight
+
+Sight is lifted from Kill Merlin and improved.
+Sight uses raycasts + OnTriggerStay to detect gameobjects (performance?)
+
+hi-rise apartment...
+
+1.1
+
+added AnthillAI, ProBuilder and Cinemachine Packages
+
+added NPCAnthillAI Scenario, States
+
+1.2
+
+AI can now patrol between points, die, switch between idle and patrol
+
+1.3
+
+added shove
+added TMP
