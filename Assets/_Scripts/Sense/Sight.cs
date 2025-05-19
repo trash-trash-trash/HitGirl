@@ -96,36 +96,40 @@ public class Sight : MonoBehaviour, ISee
         {
             objectsInVision.Remove(otherGameObject);
 
-            if (otherGameObject.GetComponent<CharacterBase>() != null)
-            {
-                CharacterBase icharacter = otherGameObject.GetComponent<CharacterBase>();
-               AddRemoveCharacterFromVision(icharacter, false);
-            }
+            CharacterBase icharacter = otherGameObject.GetComponent<CharacterBase>();
+            if (icharacter != null)
+                AddRemoveCharacterFromVision(icharacter, false);
         }
     }
     
-    public void AddRemoveCharacterFromVision(CharacterBase character, bool input)
+    public void AddRemoveCharacterFromVision(CharacterBase character, bool isVisible)
     {
-        if(input && charactersInVision.Contains(character))
-            AnnounceCanSeeCharacter?.Invoke(character);
-        
-        else if (input && !charactersInVision.Contains(character))
-        {
-            charactersInVision.Add(character);
+        bool alreadyInVision = charactersInVision.Contains(character);
 
-            if (character.character == Character.Player)
-                ChangeCanSeePlayer(character, true);
+        if (isVisible)
+        {
+            if (!alreadyInVision)
+            {
+                charactersInVision.Add(character);
+
+                if (character.character == Character.Player)
+                    ChangeCanSeePlayer(character, true);
+            }
 
             AnnounceCanSeeCharacter?.Invoke(character);
         }
-        else if (!input && charactersInVision.Contains(character))
+        else
         {
-            charactersInVision.Remove(character);
-            
-            if (character.character == Character.Player)
-                ChangeCanSeePlayer(null, false);
+            if (alreadyInVision)
+            {
+                charactersInVision.Remove(character);
+
+                if (character.character == Character.Player)
+                    ChangeCanSeePlayer(null, false);
+            }
         }
     }
+
 
     
     public void ChangeCanSee(bool input)

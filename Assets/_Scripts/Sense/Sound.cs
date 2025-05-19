@@ -31,11 +31,10 @@ public class Sound : MonoBehaviour
         
         foreach (Collider col in hitColliders)
         {
-            Debug.Log("hit "+col.name);
             IHear hearer = col.GetComponent<IHear>();
             if (hearer == null|| hearer == gameObject.GetComponent<IHear>()) continue;
 
-            Debug.Log(hearer+" hears "+gameObject.name);
+           // Debug.Log(hearer+" hears "+gameObject.name);
             
             Vector3 direction = (col.transform.position - transform.position).normalized;
             float distanceToTarget = Vector3.Distance(transform.position, col.transform.position);

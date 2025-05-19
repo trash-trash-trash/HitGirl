@@ -8,7 +8,7 @@ public class CharacterBase : MonoBehaviour, ICharacter, IHear
     public Character character;
     public Health hp;
     public SoundData mostRecentSoundHeard;
-    
+
     private bool canHear = true;
 
     public bool CanHear
@@ -18,11 +18,24 @@ public class CharacterBase : MonoBehaviour, ICharacter, IHear
     }
 
     public event Action AnnounceShoved;
+
+    public event Action AnnounceSlept;
+    
     public event Action<SoundData> AnnounceSoundHeard;
 
     public void Awake()
     {
         hp.AnnounceHPChangedBy += React;
+        hp.AnnounceHitByWeapon += ReactToWeapon;
+    }
+
+    private void ReactToWeapon(WeaponSO obj)
+    {
+        if (obj.weaponDamage == 0)
+        {
+            AnnounceSlept?.Invoke();
+            Debug.Log("hit by tranq!");
+        }
     }
 
     private void React(int incomingDamage)
@@ -59,6 +72,6 @@ public class CharacterBase : MonoBehaviour, ICharacter, IHear
 
     void OnDisable()
     {
-        hp.AnnounceHP -= React;
+        hp.AnnounceHPChangedBy -= React;
     }
 }

@@ -62,6 +62,13 @@ using UnityEngine;
 
 public class Health : MonoBehaviour
 {
+    
+    //condense...
+    public event Action<int> AnnounceHP;
+    public event Action<int> AnnounceHPChangedBy;
+    public event Action<WeaponSO> AnnounceHitByWeapon;
+    public event Action<HealthStatus> AnnounceHealthStatus;
+    
     [SerializeField]
     private int currentHP;
     
@@ -77,11 +84,19 @@ public class Health : MonoBehaviour
         set => alive = value;
     }
 
+    [SerializeField] 
+    private HealthStatus healthStatus;
+
+    public HealthStatus _healthStatus
+    {
+        get { return healthStatus; }
+        set
+        {
+            healthStatus = value;
+            AnnounceHealthStatus?.Invoke(healthStatus);
+        }
+    }
     public bool CanChangeHP { get; private set; } = true;
-
-    public event Action<int> AnnounceHP;
-
-    public event Action<int> AnnounceHPChangedBy;
 
     public int CurrentHP
     {
@@ -95,7 +110,8 @@ public class Health : MonoBehaviour
         }
     }
 
-    public void ChangeHP(int value)
+
+    public virtual void ChangeHP(int value)
     {
         if (!CanChangeHP)
             return;
@@ -103,4 +119,22 @@ public class Health : MonoBehaviour
         CurrentHP += value;
         AnnounceHPChangedBy?.Invoke(value);
     }
+
+    public virtual void HitByWeapon(WeaponSO weaponSo)
+    {
+        AnnounceHitByWeapon?.Invoke(weaponSo);
+
+        if (weaponSo.weaponDamage == 0)
+            _healthStatus = HealthStatus.Asleep;
+        
+        ChangeHP(weaponSo.weaponDamage);
+    }
+}
+
+[Serializable]
+public enum HealthStatus
+{
+    Fine,
+    Asleep,
+    Dead
 }

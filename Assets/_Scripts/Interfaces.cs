@@ -1,3 +1,8 @@
+public interface IInteractable
+{
+    public void Interact(CharacterActions action);
+}
+
 public interface IHear
 {
     public void HeardSound(SoundData sound);
@@ -25,5 +30,13 @@ public interface ICharacter
 
 public interface IWeapon
 {
+    public void Equip(WeaponSO weaponSO);
+
+    public void Aim();
+
+    public void Holster();
+    
     public void AggroAction();
+
+    public IWeapon ReturnSelf();
 }

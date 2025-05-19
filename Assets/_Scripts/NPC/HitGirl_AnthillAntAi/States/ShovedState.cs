@@ -10,10 +10,7 @@ public class ShovedState : NPCAnthillStateBase
         base.Enter();
         rb = scenarioBrain.GetComponent<Rigidbody>();
         scenarioBrain.navMeshAgent.enabled = false;
-        
-        //emit specific "shoved sound"
-        scenarioBrain.sound.EmitSound();
-        
+
         scenarioBrain.sight.CanSee = false;
         scenarioBrain.characterBase.CanHear = false;
         StartCoroutine(WaitForGetUp());

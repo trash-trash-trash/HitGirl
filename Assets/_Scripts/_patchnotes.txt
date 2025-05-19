@@ -21,3 +21,22 @@ AI can now patrol between points, die, switch between idle and patrol
 
 added shove
 added TMP
+
+1.4
+
+added sound
+added heavyObject
+
+1.5
+
+added weaponSO, IWeapon, PlayerInventory
+
+1.6
+
+working equip / aim / use weapon
+
+1.7
+
+added Rope
+
+TODO: hitboxes for body/head/limbs on characters

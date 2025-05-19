@@ -36,6 +36,8 @@ MonoBehaviour:
       name: Shoved
     - id: 10
       name: HeardSound
+    - id: 11
+      name: SleepingAlly
   actions:
   - name: Death
     isDefault: 0
@@ -65,21 +67,17 @@ MonoBehaviour:
       value: 1
     - id: 1
       value: 1
-  - name: WakeUp
+  - name: WakeUpAlly
     isDefault: 0
     state: {fileID: 2039771385642323088, guid: ad88b2756910b184c8a014885fbfd2ba, type: 3}
     cost: 1
     position: {x: 400.00018, y: 520.66656}
     pre:
-    - id: 1
-      value: 0
-    - id: 0
-      value: 1
-    - id: 2
+    - id: 11
       value: 1
     post:
-    - id: 1
-      value: 1
+    - id: 11
+      value: 0
   - name: Sleep
     isDefault: 0
     state: {fileID: 4600637498787630256, guid: 7486a612de2351147bd2cb5a12808b47, type: 3}
@@ -92,7 +90,9 @@ MonoBehaviour:
       value: 1
     - id: 2
       value: 1
-    post: []
+    post:
+    - id: 1
+      value: 1
   - name: Alert
     isDefault: 0
     state: {fileID: 8366494893754356655, guid: 14e286b8c26470f4abf8b70e47896510, type: 3}
@@ -155,6 +155,8 @@ MonoBehaviour:
       value: 0
     - id: 10
       value: 0
+    - id: 11
+      value: 0
     post:
     - id: 6
       value: 1
@@ -181,6 +183,8 @@ MonoBehaviour:
     - id: 9
       value: 0
     - id: 10
+      value: 0
+    - id: 11
       value: 0
     post:
     - id: 6
@@ -241,7 +245,7 @@ MonoBehaviour:
     - id: 4
       value: 0
     - id: 5
-      value: 1
+      value: 0
     - id: 6
       value: 0
     - id: 7
@@ -252,3 +256,5 @@ MonoBehaviour:
       value: 0
     - id: 10
       value: 0
+    - id: 11
+      value: 1

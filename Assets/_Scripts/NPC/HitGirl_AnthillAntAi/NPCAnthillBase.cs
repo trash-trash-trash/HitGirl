@@ -3,9 +3,10 @@ using Anthill.AI;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class NPCAnthillBase : MonoBehaviour, ISense
+public class NPCAnthillBase : MonoBehaviour, ISense, IInteractable
 {
     public CharacterBase characterBase;
+    public Clothes clothes;
     public Health hp;
     public NavMeshAgent navMeshAgent;
     public NPCHeadLook npcHeadLook;
@@ -25,19 +26,45 @@ public class NPCAnthillBase : MonoBehaviour, ISense
     public bool idle = false;
     public bool shoved = false;
     public bool heardSound = false;
+    public bool sleepingAlly = false;
+
+    public CharacterBase sleepingChar;
 
     void Start()
     {
         sight.AnnounceCanSeeCharacter += CheckCharacter;
         sight.AnnounceCanSeePlayer += Alert;
         characterBase.AnnounceShoved += Shoved;
+        characterBase.AnnounceSlept += Slept;
         characterBase.AnnounceSoundHeard += SoundHeard;
+        hp.AnnounceHealthStatus += SetStatus;
+    }
+
+    private void SetStatus(HealthStatus newStatus)
+    {
+        if (newStatus == HealthStatus.Asleep)
+            awake = false;
+
+        if (newStatus == HealthStatus.Fine)
+            awake = true;
+    }
+
+    private void Slept()
+    {
+        awake = false;
     }
 
     private void CheckCharacter(CharacterBase obj)
     {
         if (!obj.hp.Alive)
             alert = true;
+        if (obj.hp._healthStatus == HealthStatus.Asleep)
+        {
+            sleepingChar = obj;
+            sleepingAlly = true;
+        }
+        else
+            sleepingAlly = false;
     }
 
     private void Alert(bool obj)
@@ -67,5 +94,19 @@ public class NPCAnthillBase : MonoBehaviour, ISense
             aWorldState.Set(NPCBaseScenario.Idle, idle);
             aWorldState.Set(NPCBaseScenario.Shoved, shoved);
             aWorldState.Set(NPCBaseScenario.HeardSound, heardSound);
+            aWorldState.Set(NPCBaseScenario.SleepingAlly, sleepingAlly);
+    }
+
+    public void Interact(CharacterActions actionType)
+    {
+        //fix
+        if (actionType == CharacterActions.Undress)
+        {
+            if (!awake || !hp.Alive)
+                clothes.Undress();
+        }
+        else if (actionType == CharacterActions.WakeUp)
+            if (!awake)
+                hp._healthStatus = HealthStatus.Fine;
     }
 }

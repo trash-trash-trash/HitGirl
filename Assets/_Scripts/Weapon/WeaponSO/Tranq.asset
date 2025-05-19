@@ -10,9 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 830c99bf4f710b24cb1a54ae002c6f84, type: 3}
-  m_Name: Shove
+  m_Name: Tranq
   m_EditorClassIdentifier: 
-  range: 0
-  fireRate: 0
-  maxSound: 0
-  minSound: 0
+  range: 100
+  fireRate: 1
+  weaponDamage: 0
+  weaponForce: 12
+  weaponForceTorque: 12
+  weaponSprite: {fileID: 21300000, guid: ff3a4dc03d3728c4a8b96e83a5333fd0, type: 3}

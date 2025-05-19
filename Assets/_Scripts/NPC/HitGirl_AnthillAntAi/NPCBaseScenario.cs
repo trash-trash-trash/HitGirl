@@ -10,5 +10,6 @@ public enum NPCBaseScenario
     Idle = 7,
     Satisfied = 8,
     Shoved = 9,
-    HeardSound = 10
+    HeardSound = 10,
+    SleepingAlly = 11
 }
