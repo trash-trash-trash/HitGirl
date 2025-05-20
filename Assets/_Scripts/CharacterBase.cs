@@ -3,30 +3,21 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [Serializable]
-public class CharacterBase : MonoBehaviour, ICharacter, IHear
+public class CharacterBase : MonoBehaviour, ICharacter
 {
     public Character character;
     public Health hp;
-    public SoundData mostRecentSoundHeard;
-
-    private bool canHear = true;
-
-    public bool CanHear
-    {
-        get { return canHear; }
-        set { canHear = value; }
-    }
-
     public event Action AnnounceShoved;
-
     public event Action AnnounceSlept;
     
-    public event Action<SoundData> AnnounceSoundHeard;
 
     public void Awake()
     {
-        hp.AnnounceHPChangedBy += React;
-        hp.AnnounceHitByWeapon += ReactToWeapon;
+        if (hp != null)
+        {
+            hp.AnnounceHPChangedBy += React;
+            hp.AnnounceHitByWeapon += ReactToWeapon;
+        }
     }
 
     private void ReactToWeapon(WeaponSO obj)
@@ -46,20 +37,6 @@ public class CharacterBase : MonoBehaviour, ICharacter, IHear
         }
     }
 
-    public void HeardSound(SoundData sound)
-    {
-        if (!canHear)
-            return;
-        
-        mostRecentSoundHeard = sound;
-        AnnounceSoundHeard?.Invoke(sound);
-    }
-
-    public void FlipCanHear(bool input)
-    {
-        CanHear = input;
-    }
-
     public Character ReturnCharacter()
     {
         return character; 
@@ -72,6 +49,10 @@ public class CharacterBase : MonoBehaviour, ICharacter, IHear
 
     void OnDisable()
     {
-        hp.AnnounceHPChangedBy -= React;
+        if (hp != null)
+        {
+            hp.AnnounceHPChangedBy -= React;
+            hp.AnnounceHitByWeapon -= ReactToWeapon;
+        }
     }
 }

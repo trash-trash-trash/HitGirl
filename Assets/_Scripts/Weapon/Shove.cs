@@ -54,11 +54,7 @@ public class Shove : MonoBehaviour, IWeapon
                     Health hp = rb.gameObject.GetComponent<Health>();
                     if(hp!=null)
                         hp.ChangeHP(0);
-                    
-                    //emit specific "shoved sound"
-                    Sound sound = rb.gameObject.GetComponent<Sound>(); 
-                    sound.EmitSound();
-                    
+
                     rb.constraints = RigidbodyConstraints.None;
                     
                     //add force

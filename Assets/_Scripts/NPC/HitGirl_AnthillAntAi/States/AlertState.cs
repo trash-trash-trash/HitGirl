@@ -23,14 +23,15 @@ public class AlertState : NPCAnthillStateBase
             Random.Range(0, scenarioBrain.patrolPaths.fleePatrolPoints.Count)
         ];
         scenarioBrain.npcHeadLook.FlipLookingAt(Vector3.back, false);
+        
+        myAgent.SetDestination(fleePoint.transform.position);
     }
     
     private void FixedUpdate()
     {
-        if (fleePoint != null && myAgent != null)
-        {
-            myAgent.SetDestination(fleePoint.transform.position);
-        }
+        if (!scenarioBrain.navMeshAgent.enabled)
+            return;
+        
         //default arrival threshold 0.5
         if (!myAgent.pathPending && myAgent.remainingDistance <= 0.5f)
         {

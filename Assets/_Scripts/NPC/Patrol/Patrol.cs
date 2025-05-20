@@ -4,6 +4,7 @@ using UnityEngine.AI;
 
 public class Patrol : MonoBehaviour
 {
+    [SerializeField] private PatrolPoint currentPoint;
     [SerializeField] private List<PatrolPoint> patrolPoints;
     [SerializeField] private float arrivalThreshold = 0.5f;
 
@@ -21,7 +22,8 @@ public class Patrol : MonoBehaviour
     {
         patrolPoints = newPatrolPoints;
         currentPointIndex = 0;
-        agent.SetDestination(patrolPoints[currentPointIndex].transform.position);
+        currentPoint = patrolPoints[currentPointIndex];
+        agent.SetDestination(currentPoint.transform.position);
         patrolling = true;
     }
 

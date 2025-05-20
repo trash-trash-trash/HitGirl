@@ -44,3 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7b912721ca21214d9b77d0f1c98c93b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  wakeupDistance: 5
+  distance: 0
+  sleepingChar: {fileID: 0}

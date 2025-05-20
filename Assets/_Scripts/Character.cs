@@ -4,4 +4,5 @@ public enum Character
     Target,
     Guard,
     Civilian,
+    Object
 }

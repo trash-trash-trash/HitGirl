@@ -15,6 +15,6 @@ MonoBehaviour:
   range: 100
   fireRate: 1
   weaponDamage: 0
-  weaponForce: 12
-  weaponForceTorque: 12
+  weaponForce: 5
+  weaponForceTorque: 5
   weaponSprite: {fileID: 21300000, guid: ff3a4dc03d3728c4a8b96e83a5333fd0, type: 3}

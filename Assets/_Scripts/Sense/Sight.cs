@@ -77,6 +77,10 @@ public class Sight : MonoBehaviour, ISee
         Vector3 direction = targetTransform.position - startTransform.position;
         float distance = direction.magnitude;
         Ray ray = new Ray(startTransform.position, direction.normalized);
+        Vector3 dirNormalized = direction.normalized;
+        
+        if (Vector3.Dot(startTransform.forward, dirNormalized) < 0f)
+            return false;
 
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit, distance, blockingMask))

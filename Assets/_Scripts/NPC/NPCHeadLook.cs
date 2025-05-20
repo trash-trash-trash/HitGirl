@@ -30,7 +30,8 @@ public class NPCHeadLook : MonoBehaviour
 
     private void RotateHead(Vector3 direction)
     {
-        direction.y = 0f;
+        if(!lookingAtPointOfInterest)
+            direction.y = 0f;
 
         if (direction.sqrMagnitude > 0.01f)
         {

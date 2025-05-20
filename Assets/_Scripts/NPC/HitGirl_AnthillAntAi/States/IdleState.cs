@@ -16,15 +16,16 @@ public class IdleState : NPCAnthillStateBase
         myAgent = scenarioBrain.navMeshAgent;
         scenarioBrain.npcHeadLook.FlipLookingAt(Vector3.zero, false);
         scenarioBrain.debugText.SetText("Returning to Idle");
+        
+        myAgent.SetDestination(myIdlePoint.transform.position);
     }
 
-    private void FixedUpdate()
+    public override void Execute(float aDeltaTime, float aTimeScale)
     {
-        if (myIdlePoint != null && myAgent != null)
-        {
-            myAgent.SetDestination(myIdlePoint.transform.position);
-        }
-        //default arrival threshold 0.5
+        base.Execute(aDeltaTime, aTimeScale);
+        if (!myAgent.enabled)
+            return;
+        
         if (!myAgent.pathPending && myAgent.remainingDistance <= 0.5f)
         {
             OnIdlePointReached();

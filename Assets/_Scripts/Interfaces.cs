@@ -10,6 +10,11 @@ public interface IHear
     public void FlipCanHear(bool input);
 }
 
+public interface IMemorable
+{
+    
+}
+
 public interface ISee
 {
     public bool ReturnCanSee();

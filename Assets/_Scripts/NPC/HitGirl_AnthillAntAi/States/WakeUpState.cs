@@ -1,42 +1,113 @@
+using System.Collections;
 using UnityEngine;
 
 public class WakeupState : NPCAnthillStateBase
 {
-    [SerializeField] private float wakeupDistance = 2f;
+    [SerializeField] private float wakeupDistance = 3f;
     [SerializeField] private float distance;
     private bool hasWokenUp = false;
+
+    public CharacterBase sleepingChar;
+    MemoryData mem;
+    
+    private Vector3 lastTargetPosition;
+    private float repathThreshold = 0.1f;
+
+    public float wakeupChannelTime = 3f;
+    
+    public Coroutine wakeupCoroutine;
     
     public override void Enter()
     {
         base.Enter();
         hasWokenUp = false;
-        scenarioBrain.patrol.FlipPatrolling(false);
-    }
-    
-    private void Update()
-    {
-        if (hasWokenUp || scenarioBrain.sleepingChar == null)
-            return;
         
-        scenarioBrain.navMeshAgent.SetDestination(scenarioBrain.sleepingChar.transform.position);
-
-        distance = Vector3.Distance(scenarioBrain.transform.position, scenarioBrain.sleepingChar.transform.position);
-
-        if (distance <= wakeupDistance)
+        if (scenarioBrain.memory.GetMostRecentMemoryOfType(MemoryEnum.SleepingChar, out mem))
         {
-            WakeUpCharacter();
+            sleepingChar = mem.character;
+            scenarioBrain.npcHeadLook.FlipLookingAt(sleepingChar.transform.position, true);
+            scenarioBrain.patrol.FlipPatrolling(false);
+        }
+        else
+        {
             hasWokenUp = true;
         }
+        
+        scenarioBrain.navMeshAgent.SetDestination(sleepingChar.transform.position);
     }
 
-    private void WakeUpCharacter()
+    public override void Execute(float aDeltaTime, float aTimeScale)
     {
-        IInteractable interactable = scenarioBrain.sleepingChar.GetComponent<IInteractable>();
-        interactable.Interact(CharacterActions.WakeUp);
+        base.Execute(aDeltaTime, aTimeScale);  
+        
+        if (sleepingChar.hp._healthStatus == HealthStatus.Fine)
+            hasWokenUp = true;
+
+        if(hasWokenUp)
+          if (scenarioBrain.memory.GetMostRecentMemoryOfType(MemoryEnum.SleepingChar, out MemoryData mem))
+          {
+            sleepingChar = mem.character;
+            hasWokenUp = false;
+          }
+
+        if (hasWokenUp || sleepingChar == null || !scenarioBrain.navMeshAgent.enabled)
+            return;
+        
+        scenarioBrain.npcHeadLook.FlipLookingAt(sleepingChar.transform.position, true);
+        
+        Vector3 currentTargetPosition = sleepingChar.transform.position;
+        if (Vector3.Distance(currentTargetPosition, lastTargetPosition) > repathThreshold)
+        {
+            scenarioBrain.navMeshAgent.SetDestination(currentTargetPosition);
+            lastTargetPosition = currentTargetPosition;
+        }
+
+        distance = Vector3.Distance(scenarioBrain.transform.position, sleepingChar.transform.position);
+
+        if (!scenarioBrain.navMeshAgent.pathPending && scenarioBrain.navMeshAgent.remainingDistance <= wakeupDistance)
+        {
+            wakeupCoroutine = StartCoroutine(WakeUpCharacter());
+        }
+        
     }
 
-    private void Exit()
+    private IEnumerator WakeUpCharacter()
     {
+        float countdown = wakeupChannelTime;
+
+        while (countdown > 0f)
+        {
+            //stop if character woke up early, ie by someone else
+            if (sleepingChar == null || sleepingChar.hp._healthStatus == HealthStatus.Fine)
+            {
+                hasWokenUp = true;
+                wakeupCoroutine = null;
+                yield break;
+            }
+
+            yield return new WaitForFixedUpdate();
+            countdown -= Time.fixedDeltaTime;
+        }
+
+        if (sleepingChar != null && sleepingChar.hp._healthStatus != HealthStatus.Fine)
+        {
+            IInteractable interactable = sleepingChar.GetComponent<IInteractable>();
+            interactable?.Interact(CharacterActions.WakeUp);
+        }
+
+        hasWokenUp = true;
+        wakeupCoroutine = null;
+    }
+
+    public override void Exit()
+    {
+        base.Exit();
         hasWokenUp = false;
+        
+        if (wakeupCoroutine != null)
+        {
+            StopCoroutine(wakeupCoroutine);
+            wakeupCoroutine = null;
+        }
     }
 }

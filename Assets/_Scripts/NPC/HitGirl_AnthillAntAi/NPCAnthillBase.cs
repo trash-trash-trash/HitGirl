@@ -3,11 +3,12 @@ using Anthill.AI;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class NPCAnthillBase : MonoBehaviour, ISense, IInteractable
+public class NPCAnthillBase : MonoBehaviour, ISense, IInteractable, IHear
 {
     public CharacterBase characterBase;
     public Clothes clothes;
     public Health hp;
+    public Memory memory;
     public NavMeshAgent navMeshAgent;
     public NPCHeadLook npcHeadLook;
     public PatrolPaths patrolPaths;
@@ -25,10 +26,14 @@ public class NPCAnthillBase : MonoBehaviour, ISense, IInteractable
     public bool doJob = false;
     public bool idle = false;
     public bool shoved = false;
-    public bool heardSound = false;
-    public bool sleepingAlly = false;
 
-    public CharacterBase sleepingChar;
+    private bool canHear = true;
+
+    public bool CanHear
+    {
+        get { return canHear; }
+        set { canHear = value; }
+    }
 
     void Start()
     {
@@ -36,12 +41,14 @@ public class NPCAnthillBase : MonoBehaviour, ISense, IInteractable
         sight.AnnounceCanSeePlayer += Alert;
         characterBase.AnnounceShoved += Shoved;
         characterBase.AnnounceSlept += Slept;
-        characterBase.AnnounceSoundHeard += SoundHeard;
         hp.AnnounceHealthStatus += SetStatus;
     }
 
     private void SetStatus(HealthStatus newStatus)
     {
+        if (newStatus != HealthStatus.Fine)
+            navMeshAgent.enabled = false;
+        
         if (newStatus == HealthStatus.Asleep)
             awake = false;
 
@@ -57,14 +64,49 @@ public class NPCAnthillBase : MonoBehaviour, ISense, IInteractable
     private void CheckCharacter(CharacterBase obj)
     {
         if (!obj.hp.Alive)
-            alert = true;
-        if (obj.hp._healthStatus == HealthStatus.Asleep)
         {
-            sleepingChar = obj;
-            sleepingAlly = true;
+            //repetition
+            MemoryData newMemory = new MemoryData()
+            {
+                memoryType = MemoryEnum.DeadChar,
+                character = obj,
+                position = obj.transform.position,
+                timeMemoryAdded = Time.time,
+                //max?
+                decayTime = 30
+            };
+            
+            memory.AddOrUpdateMemory(newMemory);
+            if (memory.deadAlly)
+                alert = true;
+        }
+            
+        else if (obj.hp._healthStatus == HealthStatus.Asleep)
+        { 
+            MemoryData newMemory = new MemoryData()
+                {
+                    memoryType = MemoryEnum.SleepingChar,
+                    character = obj,
+                    position = obj.transform.position,
+                    timeMemoryAdded = Time.time,
+                    decayTime = 30
+                };
+            
+                memory.AddOrUpdateMemory(newMemory);
         }
         else
-            sleepingAlly = false;
+        {
+            MemoryData newMemory = new MemoryData()
+            {
+                memoryType = MemoryEnum.Character,
+                character = obj,
+                position = obj.transform.position,
+                timeMemoryAdded = Time.time,
+                decayTime = 3
+            };
+            
+            memory.AddOrUpdateMemory(newMemory);
+        }
     }
 
     private void Alert(bool obj)
@@ -77,9 +119,26 @@ public class NPCAnthillBase : MonoBehaviour, ISense, IInteractable
         shoved = true;
     }
     
-    private void SoundHeard(SoundData obj)
+    public void HeardSound(SoundData sound)
     {
-        heardSound = true;
+        if (!CanHear)
+            return;
+
+        MemoryData mem = new MemoryData()
+        {
+            character = sound.soundSource,
+            memoryType = MemoryEnum.Sound,
+            decayTime = sound.soundDecayTime,
+            position = sound.soundOrigin,
+            timeMemoryAdded = Time.time,
+            soundData = sound
+        };
+        memory.AddOrUpdateMemory(mem);
+    }
+
+    public void FlipCanHear(bool input)
+    {
+        CanHear = input;
     }
 
     public void CollectConditions(AntAIAgent aAgent, AntAICondition aWorldState)
@@ -93,8 +152,8 @@ public class NPCAnthillBase : MonoBehaviour, ISense, IInteractable
             aWorldState.Set(NPCBaseScenario.DoingJob, doJob);
             aWorldState.Set(NPCBaseScenario.Idle, idle);
             aWorldState.Set(NPCBaseScenario.Shoved, shoved);
-            aWorldState.Set(NPCBaseScenario.HeardSound, heardSound);
-            aWorldState.Set(NPCBaseScenario.SleepingAlly, sleepingAlly);
+            aWorldState.Set(NPCBaseScenario.HeardSound, memory.heardSound);
+            aWorldState.Set(NPCBaseScenario.SleepingAlly, memory.sleepingAlly);
     }
 
     public void Interact(CharacterActions actionType)

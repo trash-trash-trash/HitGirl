@@ -106,6 +106,9 @@ public class Health : MonoBehaviour
             currentHP = Mathf.Clamp(value, 0, maxHP);
             Alive = currentHP > 0;
             CanChangeHP &= Alive;
+            if (!Alive)
+                _healthStatus = HealthStatus.Dead;
+            
             AnnounceHP?.Invoke(currentHP);
         }
     }

@@ -4,14 +4,13 @@ using UnityEngine;
 
 public class InvestigateSoundState : NPCAnthillStateBase
 {
-    public SoundData soundHeard;
-
     [SerializeField] private float arrivalThreshold = 5f;
-    public bool reallyInvestigating=false;
     private float originalSpeed;
     private bool hasStartedLookAround = false;
 
     public float noiseRandomSphere=5;
+
+    public MemoryData mostRecentSound;
     
     public override void Enter()
     {
@@ -21,17 +20,25 @@ public class InvestigateSoundState : NPCAnthillStateBase
         if(!scenarioBrain.idle)
             scenarioBrain.patrol.FlipPatrolling(false);
         
-        soundHeard = scenarioBrain.characterBase.mostRecentSoundHeard;
-        if (soundHeard.closeSound)
-        {  
-            //actively walk to the sound
-            StartCoroutine(InvestigateRoutine());
-        }
+        CheckSoundCloseFar();
+    }
 
-        else
+    private void CheckSoundCloseFar()
+    {
+        if(scenarioBrain.memory.GetMostRecentMemoryOfType(MemoryEnum.Sound, out MemoryData mem))
         {
-            //turn and look, then resume patrol
-            StartCoroutine(DecaySound());
+            mostRecentSound = mem;
+            if (mem.soundData.closeSound)
+            {  
+                //actively walk to the sound
+                StartCoroutine(InvestigateRoutine());
+            }
+
+            else
+            {
+                //turn and look, then resume patrol
+                StartCoroutine(DecaySound());
+            }
         }
     }
     
@@ -39,12 +46,13 @@ public class InvestigateSoundState : NPCAnthillStateBase
     {
         yield return new WaitForFixedUpdate();
         scenarioBrain.navMeshAgent.speed = 0;
-        scenarioBrain.npcHeadLook.FlipLookingAt(soundHeard.originObj.position, true);
+        scenarioBrain.npcHeadLook.FlipLookingAt(mostRecentSound.soundData.originObj.position, true);
         scenarioBrain.debugText.SetText("HEARD SOMETHING?");
 
-        yield return new WaitForSeconds(soundHeard.decayTime);
+        yield return new WaitForSeconds(mostRecentSound.decayTime);
         scenarioBrain.navMeshAgent.speed = originalSpeed;
-        scenarioBrain.heardSound = false;
+
+        CheckSoundCloseFar();
     }
     
     private IEnumerator InvestigateRoutine()
@@ -52,7 +60,7 @@ public class InvestigateSoundState : NPCAnthillStateBase
         //find random spot for multple npcs investigating the same noise
         Vector3 randomOffset = Random.insideUnitSphere * noiseRandomSphere;
         randomOffset.y = 0; 
-        Vector3 targetPosition = soundHeard.soundOrigin + randomOffset;
+        Vector3 targetPosition = mostRecentSound.position + randomOffset;
 
         UnityEngine.AI.NavMeshHit hit;
         if (UnityEngine.AI.NavMesh.SamplePosition(targetPosition, out hit, noiseRandomSphere, UnityEngine.AI.NavMesh.AllAreas))
@@ -60,7 +68,7 @@ public class InvestigateSoundState : NPCAnthillStateBase
             targetPosition = hit.position; 
             
             scenarioBrain.navMeshAgent.SetDestination(targetPosition);
-            scenarioBrain.npcHeadLook.FlipLookingAt(soundHeard.originObj.position, false);
+            scenarioBrain.npcHeadLook.FlipLookingAt(mostRecentSound.position, false);
             scenarioBrain.debugText.SetText("INVESTIGATE SOUND");
             yield return new WaitForFixedUpdate();
         
@@ -73,10 +81,10 @@ public class InvestigateSoundState : NPCAnthillStateBase
 
             //silly improve
             scenarioBrain.debugText.SetText("LOOKING AROUND");
-            Vector3 lookLeft = new Vector3(soundHeard.originObj.position.x, soundHeard.originObj.position.y - 65,
-                soundHeard.originObj.position.z);
-            Vector3 lookRight  = new Vector3(soundHeard.originObj.position.x, soundHeard.originObj.position.y - 65,
-                soundHeard.originObj.position.z);
+            Vector3 lookLeft = new Vector3(transform.position.x, transform.position.y - 65,
+                transform.position.z);
+            Vector3 lookRight  = new Vector3(transform.position.x, transform.position.y + 65,
+                transform.position.z);
 
             bool lookLeftFirst = Random.value < 0.5f;
         
@@ -87,12 +95,8 @@ public class InvestigateSoundState : NPCAnthillStateBase
             scenarioBrain.npcHeadLook.FlipLookingAt(lookLeftFirst ?  lookRight : lookLeft, true);
         
             yield return new WaitForSeconds(3.5f);
-        
-            scenarioBrain.heardSound = false; 
-        }
-        else
-        {
-            StartCoroutine(DecaySound());
+            
+            CheckSoundCloseFar();
         }
     }
     
@@ -100,5 +104,6 @@ public class InvestigateSoundState : NPCAnthillStateBase
     {
         base.Exit();
         StopAllCoroutines();
+        scenarioBrain.navMeshAgent.speed = originalSpeed;
     }
 }
