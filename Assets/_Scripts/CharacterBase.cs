@@ -5,11 +5,12 @@ using UnityEngine.AI;
 [Serializable]
 public class CharacterBase : MonoBehaviour, ICharacter
 {
+    public Clothes clothes;
     public Character character;
     public Health hp;
     public event Action AnnounceShoved;
     public event Action AnnounceSlept;
-    
+
 
     public void Awake()
     {

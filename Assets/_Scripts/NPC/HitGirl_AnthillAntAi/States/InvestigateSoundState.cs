@@ -5,33 +5,44 @@ using UnityEngine;
 public class InvestigateSoundState : NPCAnthillStateBase
 {
     [SerializeField] private float arrivalThreshold = 5f;
-    private float originalSpeed;
     private bool hasStartedLookAround = false;
 
     public float noiseRandomSphere=5;
 
     public MemoryData mostRecentSound;
+
+    private float originalDecayTime;
     
     public override void Enter()
     {
         base.Enter();
         hasStartedLookAround = false;
-        originalSpeed = scenarioBrain.navMeshAgent.speed;
         if(!scenarioBrain.idle)
             scenarioBrain.patrol.FlipPatrolling(false);
-        
+
+        StartCoroutine(DelayReaction());
+    }
+    
+    IEnumerator DelayReaction()
+    {
+        float delay = Random.Range(0.0f, 1.2f);
+        yield return new WaitForSeconds(delay);
+
         CheckSoundCloseFar();
     }
 
     private void CheckSoundCloseFar()
     {
+        scenarioBrain.navMeshAgent.isStopped = false;
         if(scenarioBrain.memory.GetMostRecentMemoryOfType(MemoryEnum.Sound, out MemoryData mem))
         {
             mostRecentSound = mem;
-            if (mem.soundData.closeSound)
+            originalDecayTime = mem.soundData.soundDecayTime;
+            if (!mem.soundData.closeSound)
             {  
                 //actively walk to the sound
                 StartCoroutine(InvestigateRoutine());
+                mem.decayTime = 60;
             }
 
             else
@@ -45,12 +56,11 @@ public class InvestigateSoundState : NPCAnthillStateBase
     IEnumerator DecaySound()
     {
         yield return new WaitForFixedUpdate();
-        scenarioBrain.navMeshAgent.speed = 0;
+        
         scenarioBrain.npcHeadLook.FlipLookingAt(mostRecentSound.soundData.originObj.position, true);
         scenarioBrain.debugText.SetText("HEARD SOMETHING?");
 
         yield return new WaitForSeconds(mostRecentSound.decayTime);
-        scenarioBrain.navMeshAgent.speed = originalSpeed;
 
         CheckSoundCloseFar();
     }
@@ -75,27 +85,21 @@ public class InvestigateSoundState : NPCAnthillStateBase
             //wait until agent arrives at destination
             while (scenarioBrain.navMeshAgent.pathPending ||
                    scenarioBrain.navMeshAgent.remainingDistance > arrivalThreshold)
-            {
                 yield return null;
-            }
-
-            //silly improve
-            scenarioBrain.debugText.SetText("LOOKING AROUND");
-            Vector3 lookLeft = new Vector3(transform.position.x, transform.position.y - 65,
-                transform.position.z);
-            Vector3 lookRight  = new Vector3(transform.position.x, transform.position.y + 65,
-                transform.position.z);
-
-            bool lookLeftFirst = Random.value < 0.5f;
-        
-            scenarioBrain.npcHeadLook.FlipLookingAt(lookLeftFirst ? lookLeft : lookRight, true);
-
-            yield return new WaitForSeconds(3f);
-
-            scenarioBrain.npcHeadLook.FlipLookingAt(lookLeftFirst ?  lookRight : lookLeft, true);
-        
-            yield return new WaitForSeconds(3.5f);
             
+            scenarioBrain.debugText.SetText("LOOKING AROUND");
+            scenarioBrain.navMeshAgent.isStopped = true;
+            
+            scenarioBrain.npcHeadLook.LookAround();
+            
+            yield return new WaitUntil(() => !scenarioBrain.npcHeadLook.lookingAround);
+            
+            //probably shouldnt reset sounds here
+            mostRecentSound.decayTime = 1;
+
+            float delay = Random.Range(1.2f, 1.8f);
+            yield return new WaitForSeconds(delay);
+
             CheckSoundCloseFar();
         }
     }
@@ -104,6 +108,8 @@ public class InvestigateSoundState : NPCAnthillStateBase
     {
         base.Exit();
         StopAllCoroutines();
-        scenarioBrain.navMeshAgent.speed = originalSpeed;
+        
+        if(scenarioBrain.navMeshAgent.isOnNavMesh)
+            scenarioBrain.navMeshAgent.isStopped = false;
     }
 }

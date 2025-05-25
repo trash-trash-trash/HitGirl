@@ -44,3 +44,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc97f32cae489e84ea2912dac2863138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  arrivalThreshold: 7
+  noiseRandomSphere: 5
+  mostRecentSound:
+    memoryType: 0
+    character: {fileID: 0}
+    position: {x: 0, y: 0, z: 0}
+    timeMemoryAdded: 0
+    decayTime: 0

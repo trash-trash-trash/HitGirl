@@ -231,9 +231,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 158982782439367836}
+  - component: {fileID: 597366072805502690}
   - component: {fileID: 8315706159454952399}
   - component: {fileID: 6786515191209935524}
-  - component: {fileID: 597366072805502690}
   - component: {fileID: 8023042213216604166}
   - component: {fileID: 4191451485691798802}
   - component: {fileID: 3579590053001502819}
@@ -241,6 +241,7 @@ GameObject:
   - component: {fileID: 6381436952437873903}
   - component: {fileID: 6038624904449321303}
   - component: {fileID: 1853128619935970003}
+  - component: {fileID: 5072891792609104038}
   - component: {fileID: 4037484127658152257}
   - component: {fileID: 8739570146836618729}
   - component: {fileID: 4298825680780127772}
@@ -271,6 +272,21 @@ Transform:
   - {fileID: 2185620411903166417}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &597366072805502690
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2916093775813596642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e724e36405834fa192b36cd6a4e6059, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  manualUpdate: 0
+  thinkInterval: 0.1
+  scenario: {fileID: 11400000, guid: 756efec0d66c85c48b5ec3addf8744a5, type: 2}
 --- !u!114 &8315706159454952399
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -283,6 +299,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d318b462a41fed49a5cf610375aa130, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  clothes: {fileID: 0}
   character: 1
   hp: {fileID: 4191451485691798802}
 --- !u!114 &6786515191209935524
@@ -307,6 +324,7 @@ MonoBehaviour:
   patrol: {fileID: 6381436952437873903}
   sight: {fileID: 5052226834005184698}
   sound: {fileID: 1853128619935970003}
+  zoneChecker: {fileID: 5072891792609104038}
   debugText: {fileID: 3551295757410897787}
   spawned: 0
   awake: 0
@@ -316,22 +334,6 @@ MonoBehaviour:
   doJob: 0
   idle: 0
   shoved: 0
-  heardSound: 0
---- !u!114 &597366072805502690
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2916093775813596642}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e724e36405834fa192b36cd6a4e6059, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  manualUpdate: 0
-  thinkInterval: 0.1
-  scenario: {fileID: 11400000, guid: 756efec0d66c85c48b5ec3addf8744a5, type: 2}
 --- !u!114 &8023042213216604166
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -376,8 +378,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ad0fcd84aa24f84a94727192ab5a97a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  charactersKnownAbout: []
-  memories: []
+  knownCharacters: []
+  memoriesList: []
+  heardSound: 0
   deadAlly: 0
   sleepingAlly: 0
 --- !u!114 &6500968121488709930
@@ -397,6 +400,8 @@ MonoBehaviour:
   pointOfInterest: {x: 0, y: 0, z: 0}
   lookingAtPointOfInterest: 0
   agent: {fileID: 4037484127658152257}
+  lookingAroundWaitTime: 2
+  lookingAround: 0
 --- !u!114 &6381436952437873903
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -409,10 +414,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5494797adb3dea49a269df06ba14ad5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentPoint: {fileID: 0}
   patrolPoints: []
-  arrivalThreshold: 0.5
+  currentDistFromTarget: 0
+  patrolPointArrivalThreshold: 0
+  doorArrivalThreshold: 0
   agent: {fileID: 4037484127658152257}
   patrolling: 0
+  openingDoor: 0
+  nextDoor: {fileID: 0}
+  prevDoor: {fileID: 0}
 --- !u!114 &6038624904449321303
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -442,13 +453,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   soundFarDistance: 25
   soundCloseDistance: 15
-  soundDecayTime: 5
+  decayTime: 5
   hearingLayerMask:
     serializedVersion: 2
     m_Bits: 128
   environmentLayerMask:
     serializedVersion: 2
     m_Bits: 512
+--- !u!114 &5072891792609104038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2916093775813596642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 779568f6ab8a7bf48b17c2a2d5464cd3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentArea: {fileID: 0}
+  zoneCheckRadius: 1
+  zoneLayer:
+    serializedVersion: 2
+    m_Bits: 1048576
 --- !u!195 &4037484127658152257
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1387,5 +1415,5 @@ MonoBehaviour:
     m_Bits: 2688
   layersToIgnore:
     serializedVersion: 2
-    m_Bits: 8192
+    m_Bits: 1056768
   eyes: {fileID: 4913470398508081211}

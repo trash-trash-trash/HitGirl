@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class Clothes : MonoBehaviour
 {
@@ -24,6 +26,8 @@ public class Clothes : MonoBehaviour
 
     public SkinTones skinTones;
 
+    public event Action<Character> AnnounceCharacterClothes;
+
     public void Awake()
     {
         clothesColorDict.Add(Character.Civilian, Color.green);
@@ -33,9 +37,16 @@ public class Clothes : MonoBehaviour
 
         int rand = Random.Range(0, skinTones.skinTones.Count);
         skinColor = skinTones.skinTones[rand];
-        head.material.color = skinColor;
+        if(head!=null)
+            head.material.color = skinColor;
 
-        body.material.color = clothesColorDict[clothesCharacter];
+        ChangeClothes(clothesCharacter);
+    }
+
+    public void ChangeClothes(Character characterClothes)
+    {
+        clothesCharacter = characterClothes;
+        body.material.color = clothesColorDict[characterClothes];
     }
 
     public void Undress()

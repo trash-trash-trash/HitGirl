@@ -34,7 +34,6 @@ public class Memory : MonoBehaviour
             memories[mem.character] = mem;
             knownCharacters.Add(mem.character);
             memoriesList.Add(mem);
-
         }
 
         if (mem.memoryType == MemoryEnum.Sound)
@@ -46,19 +45,22 @@ public class Memory : MonoBehaviour
 
     IEnumerator DecayMemory(MemoryData mem)
     {
-        yield return new WaitForSeconds(mem.decayTime);
-        
+        while (mem.decayTime > 0f)
+        {
+            yield return new WaitForSeconds(1f);
+            mem.decayTime -= 1f;
+        }
+
         RemoveMemory(mem.character);
     }
 
     public void RemoveMemory(CharacterBase character)
     {
-        if (memoriesList.Contains(memories[character]))
-            memoriesList.Remove(memories[character]);
-        
-        if (memories.Remove(character))
-        {
-            RecalculateStatusFlags();
+        if (memories.TryGetValue(character, out var memData))
+        { 
+            memoriesList.Remove(memData);
+            memories.Remove(character);
+            RecalculateStatusFlags(); 
         }
     }
 

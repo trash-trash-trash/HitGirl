@@ -12,7 +12,7 @@ public class ShovedState : NPCAnthillStateBase
     public override void Enter()
     {
         base.Enter();
-
+        scenarioBrain.navMeshAgent.enabled = false;
         rb = scenarioBrain.GetComponent<Rigidbody>();
 
         // Capture the current rotation (flatten Y for upright logic)
@@ -72,6 +72,7 @@ public class ShovedState : NPCAnthillStateBase
 
         rb.MoveRotation(targetRotation);
         scenarioBrain.navMeshAgent.enabled = true;
+        scenarioBrain.navMeshAgent.isStopped = false;
         scenarioBrain.shoved = false;
     }
 }

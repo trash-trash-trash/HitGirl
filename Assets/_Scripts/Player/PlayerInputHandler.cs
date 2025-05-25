@@ -5,7 +5,6 @@ using UnityEngine.InputSystem;
 public class PlayerInputHandler : MonoBehaviour
 {
     private HGPlayerControls controls;
-    public float mouseSensitivity;
     private Vector2 moveInput;
     private Vector2 lookInput;
 
@@ -71,7 +70,8 @@ public class PlayerInputHandler : MonoBehaviour
     private void OnEnable()
     {
         controls.Enable();
-        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = false;
     }
 
     private void Update()

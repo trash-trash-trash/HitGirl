@@ -14,6 +14,10 @@ public class NPCHeadLook : MonoBehaviour
 
     [SerializeField] private NavMeshAgent agent;
 
+    public float lookingAroundWaitTime = 2f;
+    
+    public bool lookingAround=false;
+
     public void FlipLookingAt(Vector3 newPOI, bool input)
     {
         if(input)
@@ -31,7 +35,7 @@ public class NPCHeadLook : MonoBehaviour
     private void RotateHead(Vector3 direction)
     {
         if(!lookingAtPointOfInterest)
-            direction.y = 0f;
+            direction.y = transform.rotation.y;
 
         if (direction.sqrMagnitude > 0.01f)
         {
@@ -39,4 +43,49 @@ public class NPCHeadLook : MonoBehaviour
             head.rotation = Quaternion.RotateTowards(head.rotation, targetRotation, headTurnSpeed * Time.deltaTime);
         }
     }
+
+    public void LookAround()
+    {
+        lookingAround = true;
+        StartCoroutine(LookAroundCoro());
+    }
+
+    IEnumerator LookAroundCoro()
+    {
+        Vector3 neutralLookPoint = head.position + transform.forward * 2f;
+        Vector3 leftDirection = Quaternion.Euler(0, -65, 0) * head.transform.forward;
+        Vector3 rightDirection = Quaternion.Euler(0, 65, 0) * head.transform.forward;
+        
+        Vector3 leftLookPoint = head.position + leftDirection * 2f;
+        Vector3 rightLookPoint = head.position + rightDirection * 2f;
+
+        bool lookLeftFirst = Random.value < 0.5f;
+
+        FlipLookingAt(lookLeftFirst ? leftLookPoint : rightLookPoint, true);
+        yield return new WaitUntil(() => HeadFacingTarget());
+        yield return new WaitForSeconds(lookingAroundWaitTime);
+
+        // second look
+        FlipLookingAt(lookLeftFirst ? rightLookPoint : leftLookPoint, true);
+        yield return new WaitUntil(() => HeadFacingTarget());
+        yield return new WaitForSeconds(lookingAroundWaitTime);
+        
+        FlipLookingAt(neutralLookPoint, true);
+        yield return new WaitUntil(() => HeadFacingTarget());
+
+        FlipLookingAt(Vector3.zero, false);
+        lookingAround = false;
+    }
+
+    private bool HeadFacingTarget()
+    {
+        Vector3 direction = pointOfInterest - head.position;
+
+        if (direction.sqrMagnitude < 0.01f) return false;
+
+        Quaternion targetRotation = Quaternion.LookRotation(direction.normalized);
+        float angleDifference = Quaternion.Angle(head.rotation, targetRotation);
+        return angleDifference < 1f;
+    }
+
 }

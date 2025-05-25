@@ -1,6 +1,16 @@
+using UnityEngine;
+
 public interface IInteractable
 {
-    public void Interact(CharacterActions action);
+    public void Interact(IInteract interactee, CharacterActions actionType);
+
+    public GameObject ReturnSelf();
+
+    public bool ReturnCanInteract();
+}
+
+public interface IInteract
+{
 }
 
 public interface IHear

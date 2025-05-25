@@ -19,7 +19,7 @@ public class Sight : MonoBehaviour, ISee
     
     public event Action<bool> AnnounceCanSee;
     public event Action<CharacterBase> AnnounceCanSeeCharacter;
-    public event Action<bool> AnnounceCanSeePlayer;
+    public event Action<Player, bool> AnnounceCanSeePlayer;
     
     public LayerMask layersThatCanBlock;
     public LayerMask layersToIgnore;
@@ -153,8 +153,7 @@ public class Sight : MonoBehaviour, ISee
         {
             Player newPlayer = player.GetComponent<Player>();
 
-            if (newPlayer.AggroAction)
-                AnnounceCanSeePlayer?.Invoke(canSeePlayer);
+            AnnounceCanSeePlayer?.Invoke(newPlayer, true);
         }
     }
 

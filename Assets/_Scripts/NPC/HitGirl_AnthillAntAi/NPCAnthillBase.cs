@@ -15,6 +15,7 @@ public class NPCAnthillBase : MonoBehaviour, ISense, IInteractable, IHear
     public Patrol patrol;
     public Sight sight;
     public Sound sound;
+    public ZoneChecker zoneChecker;
 
     public DebugStateText debugText;
     
@@ -38,7 +39,7 @@ public class NPCAnthillBase : MonoBehaviour, ISense, IInteractable, IHear
     void Start()
     {
         sight.AnnounceCanSeeCharacter += CheckCharacter;
-        sight.AnnounceCanSeePlayer += Alert;
+        sight.AnnounceCanSeePlayer += SeenPlayer;
         characterBase.AnnounceShoved += Shoved;
         characterBase.AnnounceSlept += Slept;
         hp.AnnounceHealthStatus += SetStatus;
@@ -47,13 +48,20 @@ public class NPCAnthillBase : MonoBehaviour, ISense, IInteractable, IHear
     private void SetStatus(HealthStatus newStatus)
     {
         if (newStatus != HealthStatus.Fine)
+        {
             navMeshAgent.enabled = false;
-        
-        if (newStatus == HealthStatus.Asleep)
-            awake = false;
-
-        if (newStatus == HealthStatus.Fine)
+            CanHear = false;
+            sight.CanSee = false;  
+            
+            if (newStatus == HealthStatus.Asleep)
+                awake = false;
+        }
+        else
+        {
             awake = true;
+            CanHear = true;
+            sight.CanSee = true;
+        }
     }
 
     private void Slept()
@@ -63,7 +71,11 @@ public class NPCAnthillBase : MonoBehaviour, ISense, IInteractable, IHear
 
     private void CheckCharacter(CharacterBase obj)
     {
-        if (!obj.hp.Alive)
+        //change here if want to track objects in memory
+        if (obj.hp == null)
+            return;
+            
+            if (!obj.hp.Alive)
         {
             //repetition
             MemoryData newMemory = new MemoryData()
@@ -109,9 +121,16 @@ public class NPCAnthillBase : MonoBehaviour, ISense, IInteractable, IHear
         }
     }
 
-    private void Alert(bool obj)
+    private void SeenPlayer(Player player, bool canSeePlayer)
     {
-        alert = obj;
+        if (canSeePlayer)
+        {
+            if (player.AggroAction)
+                alert = true;
+
+            if (!zoneChecker.CheckIsPlayerCharacterAllowedInArea(player))
+                alert = true;
+        }
     }
 
     private void Shoved()
@@ -156,7 +175,7 @@ public class NPCAnthillBase : MonoBehaviour, ISense, IInteractable, IHear
             aWorldState.Set(NPCBaseScenario.SleepingAlly, memory.sleepingAlly);
     }
 
-    public void Interact(CharacterActions actionType)
+    public void Interact(IInteract interactee, CharacterActions actionType)
     {
         //fix
         if (actionType == CharacterActions.Undress)
@@ -167,5 +186,22 @@ public class NPCAnthillBase : MonoBehaviour, ISense, IInteractable, IHear
         else if (actionType == CharacterActions.WakeUp)
             if (!awake)
                 hp._healthStatus = HealthStatus.Fine;
+    }
+
+    public GameObject ReturnSelf()
+    {
+        return gameObject;
+    }
+
+    private bool canInteract = true;
+    
+    public bool CanInteract
+    {
+        get { return canInteract; }
+        set { canInteract = value; }
+    }
+    public bool ReturnCanInteract()
+    {
+        return CanInteract;
     }
 }

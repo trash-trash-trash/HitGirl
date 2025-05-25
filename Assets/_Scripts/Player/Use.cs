@@ -2,19 +2,19 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class Use : MonoBehaviour
+public class Use : MonoBehaviour, IInteract
 {
     public PlayerInputHandler playerInputs;
 
-    public Clothes playerClothes;
-    public Clothes targetClothes;
-    
     [SerializeField] private float radius = 5f;
     [SerializeField] private LayerMask interactableLayers;
 
     public Transform originPoint;
 
-    public event Action<IInteractable> AnnounceInteracting;
+    public event Action<IInteractable> AnnounceInteractableFound;
+    public event Action AnnounceDoneChecking;
+
+    public event Action AnnounceCloseMenu;
 
     public void Awake()
     {
@@ -22,18 +22,26 @@ public class Use : MonoBehaviour
     }
 
     //open radial context menu
+    //cursor probably needs more robust control
     private void TryUse(InputAction.CallbackContext context)
     {
-        if(context.canceled)
-           InteractInSphere();
+        if(context.performed)
+            InteractInSphere();
+        else if (context.canceled)
+        {
+            AnnounceCloseMenu?.Invoke();
+            Cursor.visible = false;
+        }
     }
 
     public void InteractInSphere()
     {
+        bool foundSomething = false;
         Collider[] hits = Physics.OverlapSphere(originPoint.position, radius, interactableLayers);
 
         foreach (Collider col in hits)
         {
+            //is this dumb?
             IInteractable interactable = col.GetComponent<IInteractable>();
             if (interactable == null)
             {
@@ -43,26 +51,23 @@ public class Use : MonoBehaviour
 
             if (interactable != null)
             {
-                //assumes clothes for now
-                //TODO: change
-                targetClothes = col.gameObject.GetComponent<Clothes>();
-                if (targetClothes == null)
-                    targetClothes = col.gameObject.GetComponentInParent<Clothes>();
-                if (targetClothes != null )
-                {
-                    if (!targetClothes.Clothed)
-                    {
-                        //fix
-                        playerClothes.clothesCharacter = targetClothes.clothesCharacter;
-                        playerClothes.body.material.color =
-                            playerClothes.clothesColorDict[targetClothes.clothesCharacter];
-                    }
-                    else
-                        interactable.Interact(CharacterActions.Undress);
-                }
+                //interactable.Interact(this);
 
-                AnnounceInteracting?.Invoke(interactable);
+                AnnounceInteractableFound?.Invoke(interactable);
+                
+                //only target one at a time
+               // break;
+               foundSomething = true;
             }
         }
+
+        if (foundSomething)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.lockState = CursorLockMode.Confined;
+            Cursor.visible = true;
+        }
+
+        AnnounceDoneChecking?.Invoke();
     }
 }

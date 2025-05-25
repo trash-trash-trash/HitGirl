@@ -139,7 +139,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 5961589310382961656}
   currentSpeed: 0
-  minSpeedToKill: 2
+  minSpeedToKill: 1
   sound: {fileID: 168927969295801506}
   shoveForce: 5
   ignoredLayers:
@@ -164,7 +164,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   soundFarDistance: 35
   soundCloseDistance: 35
-  soundDecayTime: 5
+  decayTime: 5
   hearingLayerMask:
     serializedVersion: 2
     m_Bits: 128

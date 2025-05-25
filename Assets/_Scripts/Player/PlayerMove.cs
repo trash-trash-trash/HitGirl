@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
@@ -9,6 +10,11 @@ public class PlayerMove : MonoBehaviour
     private Vector2 inputDirection;
 
     public Transform cameraArmTransform;
+
+    public bool canMove = true;
+    public bool moved = false;
+
+    public event Action<bool> AnnounceMoved;
 
     private void OnEnable()
     {
@@ -22,6 +28,14 @@ public class PlayerMove : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!canMove)
+            return;
+
+        if (!moved)
+        {
+            moved = true;
+            AnnounceMoved?.Invoke(moved);
+        }
         //had to flip x/y and max x negative for some reason...
         Vector3 localMove = new Vector3(inputDirection.y, 0, -inputDirection.x);
         

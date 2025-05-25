@@ -33,6 +33,13 @@ public class WakeupState : NPCAnthillStateBase
             hasWokenUp = true;
         }
         
+        StartCoroutine(DelayReaction());
+    }
+
+    IEnumerator DelayReaction()
+    {
+        float delay = Random.Range(0.0f, 1.2f);
+        yield return new WaitForSeconds(delay);
         scenarioBrain.navMeshAgent.SetDestination(sleepingChar.transform.position);
     }
 
@@ -66,6 +73,7 @@ public class WakeupState : NPCAnthillStateBase
 
         if (!scenarioBrain.navMeshAgent.pathPending && scenarioBrain.navMeshAgent.remainingDistance <= wakeupDistance)
         {
+            scenarioBrain.navMeshAgent.isStopped = true;
             wakeupCoroutine = StartCoroutine(WakeUpCharacter());
         }
         
@@ -92,18 +100,27 @@ public class WakeupState : NPCAnthillStateBase
         if (sleepingChar != null && sleepingChar.hp._healthStatus != HealthStatus.Fine)
         {
             IInteractable interactable = sleepingChar.GetComponent<IInteractable>();
-            interactable?.Interact(CharacterActions.WakeUp);
+            interactable?.Interact(scenarioBrain.patrol, CharacterActions.WakeUp);
         }
 
+        scenarioBrain.npcHeadLook.FlipLookingAt(sleepingChar.gameObject.transform.position, true);
+        StartCoroutine(DelayReactionWakeup());
+    }
+
+    IEnumerator DelayReactionWakeup()
+    {
+        float delay = Random.Range(1f, 2.5f);
+        yield return new WaitForSeconds(delay);
         hasWokenUp = true;
         wakeupCoroutine = null;
+        scenarioBrain.navMeshAgent.isStopped = false;
     }
 
     public override void Exit()
     {
         base.Exit();
         hasWokenUp = false;
-        
+        scenarioBrain.navMeshAgent.isStopped = false;
         if (wakeupCoroutine != null)
         {
             StopCoroutine(wakeupCoroutine);
